@@ -1,0 +1,37 @@
+graph TD
+    %% Definición de Nodos (Servicios)
+    Usuario[Usuario Final]
+    
+    subgraph VPC [AWS Cloud - VPC]
+        ALB((Amazon ALB<br/>Balanceador de Carga))
+        
+        subgraph ASG [Auto Scaling Group<br/>Min=1, Max=2]
+            EC2_1[Instancia EC2<br/>Nginx Monolito A]
+            EC2_2[Instancia EC2<br/>Nginx Monolito B]
+        
+        end
+        
+        DB[(Amazon DynamoDB<br/>Opcional)]
+    end
+    
+    CW{{Amazon CloudWatch<br/>Alarma CPU > 80%}}
+
+    %% Conexiones (Flujo y Monitoreo)
+    Usuario -->|Petición HTTP| ALB
+    ALB -->|Distribuye Tráfico| EC2_1
+    ALB -.->|Escala Horizontalmente| EC2_2
+    
+    %% Conexiones Opcionales
+    EC2_1 -.->|Lee/Escribe| DB
+    
+    %% Monitoreo y Acción
+    EC2_1 -.->|Envía Métricas| CW
+    CW -->|Activa Escalado| ASG
+
+    %% Estilos de los iconos (Colores AWS)
+    style ALB fill:#ff9900,stroke:#232f3e,color:#fff
+    style EC2_1 fill:#ff9900,stroke:#232f3e,color:#fff
+    style EC2_2 fill:#ff9900,stroke:#232f3e,color:#fff
+    style DB fill:#40b5e0,stroke:#232f3e,color:#fff
+    style CW fill:#ff4f8b,stroke:#232f3e,color:#fff
+    style VPC fill:#f5f5f5,stroke:#333
