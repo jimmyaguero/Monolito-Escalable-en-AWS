@@ -1,50 +1,62 @@
-Un buen README.md es la cara visible de tu repositorio y, para un Arquitecto Cloud, es la oportunidad de demostrar que sabes documentar infraestructura profesionalmente.
+# 🚀 Proyecto: Monolito Escalable en AWS
+> **Módulo 6: Escalabilidad, Alta Disponibilidad y Monitoreo**
 
-Aquí tienes una estructura sólida, técnica y lista para copiar.
+Este repositorio contiene la documentación y evidencias de la migración de una infraestructura on-premise hacia una arquitectura elástica en **Amazon Web Services**, realizada como parte de la evaluación final del Módulo 6.
 
-Monolito Escalable en AWS - Módulo 6
-Este proyecto forma parte de la evaluación del Módulo 6 de Alkemy / AWS Academy. Consiste en la migración de una aplicación monolítica on-premise hacia una arquitectura en la nube de AWS, garantizando Alta Disponibilidad, Escalabilidad Automática y Monitoreo.
+---
 
-Situación Inicial
-La empresa presentaba caídas constantes en sus servicios debido a un servidor único con recursos limitados. La solución propuesta migra esta carga a AWS utilizando servicios gestionados para eliminar puntos únicos de fallo.
+## 📋 Situación Inicial
+La aplicación presentaba fallos de disponibilidad en picos de tráfico. Se implementó una solución basada en el **Manejo de Cómputo Elástico** para eliminar puntos únicos de fallo y optimizar costos.
 
-Arquitectura
-La solución implementa los siguientes servicios de Amazon Web Services:
+## 🏗️ Arquitectura del Sistema
+La solución utiliza un enfoque de **Infraestructura Viva**, combinando balanceo de carga y auto-escalado.
 
-Amazon EC2: Servidor de cómputo para el monolito (Amazon Linux 2023).
-
-Application Load Balancer (ALB): Punto de entrada único que distribuye el tráfico hacia las instancias saludables.
-
-Auto Scaling Group (ASG): Gestión elástica de instancias (Mín: 1, Máx: 2) según la demanda.
-
-Amazon CloudWatch: Sistema de alarmas basado en el uso de CPU para disparar el escalado.
-
-Amazon DynamoDB: Capa de persistencia NoSQL para el registro de visitas.
-
-Diagrama de Red (Mermaid)
-Code snippet
+### 🗺️ Diagrama de Infraestructura
+```mermaid
 graph TD
-    Internet((Internet)) --> ALB[Application Load Balancer]
-    subgraph VPC
-        ALB --> ASG[Auto Scaling Group]
-        subgraph Disponibilidad
-            ASG --> EC2[EC2 Instance - Monolito]
+    User((🌐 Usuarios)) --> ALB[Application Load Balancer]
+    
+    subgraph VPC_Public_Subnets
+        ALB --> TG[Target Group: TG-Monolito]
+        TG --> ASG[Auto Scaling Group]
+        
+        subgraph EC2_Fleet
+            ASG --> EC2_A[EC2 Instance 1]
+            ASG --> EC2_B[EC2 Instance 2]
         end
-        EC2 <--> DDB[(Amazon DynamoDB)]
-        EC2 -.-> CW[CloudWatch Alarms]
     end
-Implementación Paso a Paso
-Cómputo: Despliegue de instancia base con servidor Apache/Nginx mediante User Data.
 
-Red y Seguridad: Configuración de Security Groups permitiendo tráfico HTTP (80), HTTPS (443) y SSH (22).
+    EC2_Fleet -.-> CW[CloudWatch Alarms]
+    EC2_Fleet <--> DDB[(Amazon DynamoDB)]
+    CW --> ASG
 
-Alta Disponibilidad: Creación de un Target Group y un ALB para balancear el tráfico entre zonas de disponibilidad.
+```
+## 🛠️ Stack Tecnológico
 
-Elasticidad: Configuración de Launch Template y ASG para asegurar la disponibilidad del servicio.
+| Servicio | Función |
+| :--- | :--- |
+| **Amazon EC2** | Instancias de cómputo para la aplicación Monolítica (Amazon Linux 2023). |
+| **AWS ALB** | Balanceador de Carga de Aplicaciones para distribución en Capa 7. |
+| **AWS ASG** | Auto Scaling Group para asegurar alta disponibilidad y elasticidad. |
+| **CloudWatch** | Monitoreo de métricas y alarmas de umbral de CPU. |
+| **DynamoDB** | Persistencia NoSQL para registro de datos (Opcional). |
 
-Observabilidad: Creación de alarmas en CloudWatch con un umbral de CPU > 80% para escalado horizontal.
+---
 
-Lecciones Aprendidas
-Troubleshooting: Resolución de errores 503 mediante el ajuste de Health Checks y alineación de Security Groups entre el ALB y las instancias.
+## 🚀 Implementación y Lecciones Aprendidas
 
-Infraestructura como Valor: La importancia de separar la capa de datos (DynamoDB) del cómputo para facilitar el escalado sin pérdida de información.
+### 1. Despliegue y Seguridad
+Se configuró un **Security Group** robusto permitiendo tráfico entrante en los puertos `80` (HTTP), `443` (HTTPS) y `22` (SSH para administración). Se validó la conectividad inicial mediante la IP pública antes de la integración con el balanceador.
+
+### 2. Balanceo y Alta Disponibilidad
+La implementación del **Target Group** permitió realizar *Health Checks* automáticos a la ruta raíz (`/`). Durante este proceso, se realizó el troubleshooting de un **Error 503**, identificando la necesidad de sincronizar las reglas de seguridad entre el ALB y las instancias EC2 para permitir el flujo de tráfico.
+
+### 3. Escalado Automático y Monitoreo
+Se definió un **Launch Template** con scripts de *User Data* para automatizar el despliegue de nuevas instancias. Se configuró una alarma de **CloudWatch** que monitorea el uso de CPU, garantizando que el sistema escale horizontalmente de forma automática ante picos de demanda.
+
+---
+
+## 👤 Autor
+**Jimmy Agüero** *Estudiante Arquitecto Cloud* 
+
+---
